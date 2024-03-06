@@ -3,9 +3,9 @@
 import math
 
 class Node:
-    def __init__(self, question_array, datapoints):
+    def __init__(self, datapoints):
         self.question = -1 #Attribute to test NEXT, won't know at time of initialisation
-        self.questions_left = question_array #Questions that haven't been asked yet, includes the next question to be asked
+        self.questions_asked = []
         self.children = {} #Each child will use their answer as their key
         self.leaf = False
 
@@ -15,31 +15,35 @@ class Node:
         self.question = question_index
 
     def create_child(self, answer, datapoints):
-        child_questions = self.questions_left #TODO: when done check that I don't need questions_left after question to ask is known
+        child_questions = self.questions_asked #TODO: when done check that I don't need questions_left after question to ask is known
 
-        for index, question in enumerate(child_questions):
-            if question == self.question:
-                child_questions.pop(index)
+        child_questions.append(self.question)
 
-        self.children[answer] = Node(child_questions, datapoints)
+        self.children[answer] = Node(datapoints)
 
     def grow_leaf(self):
         initial_entropy = calc_entropy(self.remaining_datapoints)
         highest_information_gain = -1
         best_outputs, best_question = None, None
 
-        for question in self.questions_left:
-            information_gain, outputs = calc_information_gain(self.remaining_datapoints, question, initial_entropy)
+        #print (f"Questions asked: ", self.questions_asked)
+        for question in range (0,6):
+            if question not in self.questions_asked:
+                information_gain, outputs = calc_information_gain(self.remaining_datapoints, question, initial_entropy)
 
-            if information_gain > highest_information_gain:
-                print ("New best question: ", question)
-                highest_information_gain = information_gain
-                best_outputs = outputs
-                best_question = question
+                if information_gain > highest_information_gain:
+                    #print ("New best question: ", question)
+                    highest_information_gain = information_gain
+                    best_outputs = outputs
+                    best_question = question
 
         self.question = best_question
 
         for branch in best_outputs: #best_outputs = {"answer":[datapoints]}
+            check_array = []
+            for _ in best_outputs:
+                check_array.append(_)
+
             self.create_child(branch, best_outputs[branch])
 
             check_value,solved = None,True
@@ -50,16 +54,19 @@ class Node:
                     solved = False
 
 
-            if len(self.children[branch].questions_left) > 0 and not solved:
+            if len(self.children[branch].questions_asked) < 6 and not solved:
                 self.children[branch].grow_leaf()
             elif not solved:
                 self.children[branch].leaf = True
-                self.children[branch].result = "ambigous"
+                self.children[branch].result = "ambiguous"
                 print ("unsolved")
+                print (self.questions_asked)
             else: #Is a leaf not a node
                 self.children[branch].leaf = True
                 self.children[branch].result = check_value
+
                 print ("solved: ", check_value)
+
 
 
 def read_data():
@@ -174,7 +181,7 @@ def calc_information_gain(data_set, index, initial_entropy):
 def create_tree():
     data_set, attribute_count = read_data()
 
-    root_node = Node([0,1,2,3,4,5], data_set)
+    root_node = Node(data_set)
     root_node.grow_leaf()
 
     return 0
