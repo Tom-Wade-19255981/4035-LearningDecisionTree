@@ -72,66 +72,27 @@ def calc_information_gain(data_set, index):
     inital_entropy = calc_entropy(data_set)
     initial_length = len(data_set)
 
-    test_outputs = {}
-    new_entropy = 0
+    test_outputs = {} #Holds the outputs for this question
+    new_entropy = 0 #New entropy is calculated using a sum
 
-    #Split into 3/4 arrays
+    #Finding the outputs for the question
     for item in data_set:
         try:
             test_outputs[item[index]].append(item) #Add to the array of outputs
-        except KeyError:
-            test_outputs[item[index]] = [item] #Create an array of outputs
 
-    # testing_output_counts = []
-    # for output in test_outputs:
-    #     this_output = test_outputs[output]
-    #
-    #
-    #
-    #     attribute_count = {  # Might be redundant
-    #         0: {"vhigh": 0, "high": 0, "med": 0, "low": 0},  # Buying price: low good high bad
-    #         1: {"vhigh": 0, "high": 0, "med": 0, "low": 0},  # Maintenance: low good high bad
-    #         2: {"2": 0, "3": 0, "4": 0, "5more": 0},  # Number of doors
-    #         3: {"2": 0, "4": 0, "more": 0},  # Number of passengers
-    #         4: {"small": 0, "med": 0, "big": 0},  # Size of boot
-    #         5: {"high": 0, "med": 0, "low": 0},  # Safety
-    #         6: {"vgood":0, "good":0, "acc":0, "unacc":0}
-    #     }
-    #
-    #     for data_point in this_output:
-    #
-    #         for i in range(0, 7):
-    #             try:
-    #                 attribute_count[i][data_point[index]] += 1
-    #             except KeyError:
-    #                 attribute_count[i][data_point[index]] = 1
-    #
-    #     testing_output_counts.append(attribute_count)
-    #
-    # for _ in testing_output_counts:
-    #     print (_)
-    #     print ("\n")
+        except KeyError: #KeyError means output hasn't been found before
+            test_outputs[item[index]] = [item] #Create an array of outputs
 
     #Calculate entropy of each array
     for output in test_outputs:
         probability_of_case = len(test_outputs[output])/initial_length
         entropy_of_case = calc_entropy(test_outputs[output])
 
+        #Using the entropy equation shown on the slides in week 3
         new_entropy += probability_of_case * entropy_of_case
-
-
 
     #Calculate information gain
     information_gain = inital_entropy - new_entropy
-
-    # print ("New entropy: ", new_entropy)
-    # print ("IG: ", information_gain)
-    #
-    # for _class in test_outputs:
-    #     print ("\nOutput: ")
-    #     for data_point in test_outputs[_class]:
-    #         print (data_point)
-    #print (test_outputs)
 
     return information_gain, test_outputs
 
