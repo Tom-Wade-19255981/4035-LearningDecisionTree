@@ -60,10 +60,12 @@ def calc_entropy(data_set):
 def calc_information_gain(data_set, index):
     """
     Calculates the information gain given a decision.
+
     :param data_set: A 2D array where each data point is an array. Each data point stores its class as the final item in the list: preceding items are attributes.
     :type data_set: list
     :param index: Index of the attribute the decision tree uses for the decision.
-    :return:
+    :return: A tuple containing: information_gain (float) - Information gain of the choice, test_output (dictionary)- A dictionary where the key is the result of the choice and the value is the smaller dataset.
+    :rtype: tuple
     """
 
 
@@ -79,39 +81,36 @@ def calc_information_gain(data_set, index):
             test_outputs[item[index]].append(item) #Add to the array of outputs
         except KeyError:
             test_outputs[item[index]] = [item] #Create an array of outputs
-            print ("Created an array for the output: ",item[index])
 
-    testing_output_counts = []
-    for output in test_outputs:
-        this_output = test_outputs[output]
-
-
-
-        attribute_count = {  # Might be redundant
-            0: {"vhigh": 0, "high": 0, "med": 0, "low": 0},  # Buying price: low good high bad
-            1: {"vhigh": 0, "high": 0, "med": 0, "low": 0},  # Maintenance: low good high bad
-            2: {"2": 0, "3": 0, "4": 0, "5more": 0},  # Number of doors
-            3: {"2": 0, "4": 0, "more": 0},  # Number of passengers
-            4: {"small": 0, "med": 0, "big": 0},  # Size of boot
-            5: {"high": 0, "med": 0, "low": 0},  # Safety
-            6: {"vgood":0, "good":0, "acc":0, "unacc":0}
-        }
-
-        for data_point in this_output:
-
-            for i in range(0, 7):
-                try:
-                    attribute_count[i][data_point[0]] += 1
-                except KeyError:
-                    attribute_count[i][data_point[0]] = 1
-
-        testing_output_counts.append(attribute_count)
-
-    for _ in testing_output_counts:
-        print (_)
-        print ("\n")
-
-
+    # testing_output_counts = []
+    # for output in test_outputs:
+    #     this_output = test_outputs[output]
+    #
+    #
+    #
+    #     attribute_count = {  # Might be redundant
+    #         0: {"vhigh": 0, "high": 0, "med": 0, "low": 0},  # Buying price: low good high bad
+    #         1: {"vhigh": 0, "high": 0, "med": 0, "low": 0},  # Maintenance: low good high bad
+    #         2: {"2": 0, "3": 0, "4": 0, "5more": 0},  # Number of doors
+    #         3: {"2": 0, "4": 0, "more": 0},  # Number of passengers
+    #         4: {"small": 0, "med": 0, "big": 0},  # Size of boot
+    #         5: {"high": 0, "med": 0, "low": 0},  # Safety
+    #         6: {"vgood":0, "good":0, "acc":0, "unacc":0}
+    #     }
+    #
+    #     for data_point in this_output:
+    #
+    #         for i in range(0, 7):
+    #             try:
+    #                 attribute_count[i][data_point[index]] += 1
+    #             except KeyError:
+    #                 attribute_count[i][data_point[index]] = 1
+    #
+    #     testing_output_counts.append(attribute_count)
+    #
+    # for _ in testing_output_counts:
+    #     print (_)
+    #     print ("\n")
 
     #Calculate entropy of each array
     for output in test_outputs:
@@ -125,9 +124,16 @@ def calc_information_gain(data_set, index):
     #Calculate information gain
     information_gain = inital_entropy - new_entropy
 
-    print ("New entropy: ", new_entropy)
-    print ("IG: ", information_gain)
+    # print ("New entropy: ", new_entropy)
+    # print ("IG: ", information_gain)
+    #
+    # for _class in test_outputs:
+    #     print ("\nOutput: ")
+    #     for data_point in test_outputs[_class]:
+    #         print (data_point)
     #print (test_outputs)
+
+    return information_gain, test_outputs
 
 
 if __name__ == "__main__":
@@ -145,4 +151,5 @@ if __name__ == "__main__":
 
     print ("Initial entropy: ",calc_entropy(data_set))
 
-    calc_information_gain(data_set, 0)
+    information_gain, test_outputs = calc_information_gain(data_set, 5)
+    print ("Information gain: ", information_gain)
