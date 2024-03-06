@@ -28,6 +28,15 @@ def tally_attribute(data_arr, attribute_count):
     return attribute_count
 
 def calc_entropy(data_set):
+    """
+    Calculates the entropy of a given data set.
+
+    :param data_set: A 2D array where each data point is an array. Each data point stores its class as the final item in the list: preceding items are attributes.
+    :type data_set: list
+    :return: The entropy of the data set (always +ve)
+    :rtype: int
+    """
+
     classes = {}
     length = len(data_set)
     for item in data_set:
@@ -49,6 +58,15 @@ def calc_entropy(data_set):
     return -sum
 
 def calc_information_gain(data_set, index):
+    """
+    Calculates the information gain given a decision.
+    :param data_set: A 2D array where each data point is an array. Each data point stores its class as the final item in the list: preceding items are attributes.
+    :type data_set: list
+    :param index: Index of the attribute the decision tree uses for the decision.
+    :return:
+    """
+
+
     inital_entropy = calc_entropy(data_set)
     initial_length = len(data_set)
 
