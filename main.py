@@ -73,30 +73,31 @@ class Node:
             else: #Is a leaf not a node
                 self.children[branch].leaf = True
                 self.children[branch].result = check_value
-
-                print ("solved: ", check_value)
                 number_leaves += 1
         return number_leaves
+
+    def display_children(self, depth):
+
+        if not self.leaf:
+            print (" "*depth + "Attribute: ", self.question)
+
+            for branch in self.children:
+                print (" "*(depth+1) + "Branch: ", branch)
+                self.children[branch].display_children(depth+2)
+        else:
+            print (" "*depth, self.result)
 
 
 
 def read_data():
     """
     Retrieves data from the .data file
-    NOTE: ensure the file to be read from is hard coded
+    NOTE: ensure the file address is correct it is hard coded.
     :return:
     """
+
     data_set = []
     filename = "car.data"
-
-    attribute_count = {  # Might be redundant
-        0: {"vhigh": 0, "high": 0, "med": 0, "low": 0},  # Buying price: low good high bad
-        1: {"vhigh": 0, "high": 0, "med": 0, "low": 0},  # Maintenance: low good high bad
-        2: {"2": 0, "3": 0, "4": 0, "5more": 0},  # Number of doors
-        3: {"2": 0, "4": 0, "more": 0},  # Number of passengers
-        4: {"small": 0, "med": 0, "big": 0},  # Size of boot
-        5: {"high": 0, "med": 0, "low": 0}  # Safety
-    }
 
     with open (filename, "r") as car_data:
         for data_point in car_data:
@@ -104,10 +105,8 @@ def read_data():
 
             data_set.append(data_arr)
 
-            attribute_count = tally_attribute(data_arr, attribute_count) #TODO: remove this function, only for checking
 
-
-    return data_set, attribute_count
+    return data_set
 
 def split_row(row): #Formats each row of the data set
     data = row.split(",")
@@ -191,7 +190,9 @@ def calc_information_gain(data_set, index, initial_entropy):
 
 
 if __name__ == "__main__":
-    data_set, attribute_count = read_data()
+    data_set = read_data()
 
     root_node = Node(data_set)
-    print (f"Number of leafs: {root_node.grow_leaf()}")
+    print (f"Number of leaves: {root_node.grow_leaf()}")
+
+    print (root_node.display_children(0))
