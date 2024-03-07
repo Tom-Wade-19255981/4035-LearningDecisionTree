@@ -22,6 +22,14 @@ class Node:
         self.children[answer] = Node(datapoints)
 
     def grow_leaf(self):
+        """
+        A method which recursively splits the dataset of the given node into a branches using the classes of the datapoints.
+
+        :return: Returns the number of leaves created from this "branch"
+        :rtype: int
+        """
+
+        number_leaves = 0
         initial_entropy = calc_entropy(self.remaining_datapoints)
         highest_information_gain = -1
         best_outputs, best_question = None, None
@@ -55,17 +63,20 @@ class Node:
 
 
             if len(self.children[branch].questions_asked) < 6 and not solved:
-                self.children[branch].grow_leaf()
+                number_leaves += self.children[branch].grow_leaf()
             elif not solved:
                 self.children[branch].leaf = True
                 self.children[branch].result = "ambiguous"
                 print ("unsolved")
                 print (self.questions_asked)
+                number_leaves += 1
             else: #Is a leaf not a node
                 self.children[branch].leaf = True
                 self.children[branch].result = check_value
 
                 print ("solved: ", check_value)
+                number_leaves += 1
+        return number_leaves
 
 
 
@@ -178,31 +189,9 @@ def calc_information_gain(data_set, index, initial_entropy):
 
     return information_gain, test_outputs
 
-def create_tree():
+
+if __name__ == "__main__":
     data_set, attribute_count = read_data()
 
     root_node = Node(data_set)
-    root_node.grow_leaf()
-
-    return 0
-
-
-if __name__ == "__main__":
-    attribute_count = { #Might be redundant
-        0: {"vhigh":0,"high":0,"med":0,"low":0}, #Buying price: low good high bad
-        1: {"vhigh": 0, "high": 0, "med": 0, "low": 0}, #Maintenance: low good high bad
-        2: {"2":0,"3":0,"4":0,"5more":0}, #Number of doors
-        3: {"2":0,"4":0,"more":0}, #Number of passengers
-        4: {"small":0,"med":0,"big":0}, #Size of boot
-        5: {"high": 0, "med": 0, "low": 0} #Safety
-    }
-
-    create_tree()
-    # data_set, attribute_count = read_data()
-    #
-    # print (attribute_count)
-    #
-    # print ("Initial entropy: ",calc_entropy(data_set))
-    #
-    # information_gain, test_outputs = calc_information_gain(data_set, 5, calc_entropy(data_set))
-    # print ("Information gain: ", information_gain)
+    print (f"Number of leafs: {root_node.grow_leaf()}")
