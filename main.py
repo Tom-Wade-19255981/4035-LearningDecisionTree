@@ -1,6 +1,7 @@
 #Learning Decision Tree
 
 import math
+import time
 
 class Node:
     def __init__(self, datapoints):
@@ -10,9 +11,6 @@ class Node:
         self.leaf = False
 
         self.remaining_datapoints = datapoints
-
-    def set_next_question(self, question_index):
-        self.question = question_index
 
     def create_child(self, answer, datapoints):
         child_questions = self.questions_asked #TODO: when done check that I don't need questions_left after question to ask is known
@@ -85,8 +83,21 @@ class Node:
                 print (" "*(depth+1) + "Branch: ", branch)
                 self.children[branch].display_children(depth+2)
         else:
-            print (" "*depth, self.result)
+            print (" "*depth + str(int(depth/2)) + "OUTCOME:", self.result)
 
+    def find_outcome(self, data_point):
+        """
+        Traverses the data set using the provided data point to find the output.
+        :param data_point: An array of 6 attributes. Assumed to be valid.
+        :type data_point: list
+        :return: The output for the data point
+        :rtype: string
+        """
+
+        if not self.leaf:
+            return self.children[data_point[self.question]].find_outcome(data_point)
+        else:
+            return self.result
 
 
 def read_data():
@@ -193,6 +204,13 @@ if __name__ == "__main__":
     data_set = read_data()
 
     root_node = Node(data_set)
-    print (f"Number of leaves: {root_node.grow_leaf()}")
+    start_time = time.time()
+    leaves = root_node.grow_leaf()
+    time_taken = (time.time() - start_time) * 1000
+    print (f"Number of leaves: {leaves}, grown in {time_taken} milliseconds")
 
     print (root_node.display_children(0))
+
+
+    print (root_node.find_outcome(["low","low","5more","more","big","high"]))
+
