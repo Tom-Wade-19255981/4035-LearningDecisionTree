@@ -1,6 +1,7 @@
 #Learning Decision Tree
 
 import math
+import random
 import time
 
 class Node:
