@@ -1,6 +1,7 @@
 #Learning Decision Tree
 
 import math
+import random
 import time
 
 class Node:
@@ -13,10 +14,6 @@ class Node:
         self.remaining_datapoints = datapoints
 
     def create_child(self, answer, datapoints):
-        child_questions = self.questions_asked #TODO: when done check that I don't need questions_left after question to ask is known
-
-        child_questions.append(self.question)
-
         self.children[answer] = Node(datapoints)
 
     def grow_leaf(self):
@@ -29,31 +26,27 @@ class Node:
 
         number_leaves = 0
         initial_entropy = calc_entropy(self.remaining_datapoints)
-        highest_information_gain = -1
+        highest_information_gain = -1 #calc_entropy ALWAYS returns a +ve number so any question will give a higher information gain than this
         best_outputs, best_question = None, None
 
-        #print (f"Questions asked: ", self.questions_asked)
+
         for question in range (0,6):
             if question not in self.questions_asked:
                 information_gain, outputs = calc_information_gain(self.remaining_datapoints, question, initial_entropy)
 
                 if information_gain > highest_information_gain:
-                    #print ("New best question: ", question)
                     highest_information_gain = information_gain
                     best_outputs = outputs
                     best_question = question
 
         self.question = best_question
 
-        for branch in best_outputs: #best_outputs = {"answer":[datapoints]}
-            check_array = []
-            for _ in best_outputs:
-                check_array.append(_)
-
+        #For loop will never be run in a leaf as "best_outputs" will be empty
+        for branch in best_outputs: #Format for best_outputs: {"answer":[datapoints]}
             self.create_child(branch, best_outputs[branch])
 
             check_value,solved = None,True
-            for datapoint in best_outputs[branch]:
+            for datapoint in best_outputs[branch]: #check if all outputs are equal
                 if check_value is None:
                     check_value = datapoint[-1]
                 elif check_value != datapoint[-1]:
@@ -74,23 +67,28 @@ class Node:
                 number_leaves += 1
         return number_leaves
 
-    def display_children(self, depth):
-
-        if not self.leaf:
-            print (" "*depth + "Attribute: ", self.question)
+    def display_children(self, depth=0):
+        """
+        Traverses the tree and outputs the branches and leaves of the tree
+        :param depth: Automatically set to 0, does not need changing.
+        :return:
+        """
+        if not self.leaf: #Higher the depth, further to the right.
+            print (" "*depth + "Attribute: ",self.question) #The attribute being tested
 
             for branch in self.children:
-                print (" "*(depth+1) + "Branch: ", branch)
+                print (" "*(depth+1) + "Branch: ",branch) #Result of the question
+                #print(" "*(depth+1) +"Distribution: ", calc_distribution(self.remaining_datapoints)) #Used for testing the tree
                 self.children[branch].display_children(depth+2)
         else:
-            print (" "*depth + str(int(depth/2)) + "OUTCOME:", self.result)
+            print (" "*depth, self.result)
 
     def find_outcome(self, data_point):
         """
         Traverses the data set using the provided data point to find the output.
-        :param data_point: An array of 6 attributes. Assumed to be valid.
+        :param data_point: An array of 6 attributes. Assumed to contain valid attributes.
         :type data_point: list
-        :return: The output for the data point
+        :return: The output for the data point.
         :rtype: string
         """
 
@@ -104,7 +102,8 @@ def read_data():
     """
     Retrieves data from the .data file
     NOTE: ensure the file address is correct it is hard coded.
-    :return:
+    :return: The array of all data points, stored as arrays
+    :rtype list:
     """
 
     data_set = []
@@ -123,11 +122,6 @@ def split_row(row): #Formats each row of the data set
     data = row.split(",")
     data[-1] = data[-1][:-1] #Remove "\n" from class of datapoint
     return data
-
-def tally_attribute(data_arr, attribute_count):
-    for i in range (0,6):
-        attribute_count[i][data_arr[i]] += 1
-    return attribute_count
 
 def calc_entropy(data_set):
     """
@@ -199,7 +193,6 @@ def calc_information_gain(data_set, index, initial_entropy):
 
     return information_gain, test_outputs
 
-
 if __name__ == "__main__":
     data_set = read_data()
 
@@ -209,8 +202,70 @@ if __name__ == "__main__":
     time_taken = (time.time() - start_time) * 1000
     print (f"Number of leaves: {leaves}, grown in {time_taken} milliseconds")
 
-    print (root_node.display_children(0))
+    using = True
+    while using:
+        print ("\nPlease choose an option:")
+        print ("1. Display tree")
+        print ("2. Test data point")
+        print ("3. Exit")
+        choice = int(input("(1/2/3): "))
+        if choice == 1: root_node.display_children(0)
+        elif choice == 2:
+            buying = input("Please enter the cost of the car: ")
+            maintenance = input("Please enter the maintenance cost of the car: ")
+            doors = input("Please enter the number of doors the car has: ")
+            passengers = input("Please enter the number of people the car can hold: ")
+            boot_size = input("Please enter the size of the boot: ")
+            safety = input("Please enter the safety level of the car: ")
+            outcome = root_node.find_outcome([buying, maintenance, doors, passengers, boot_size, safety])
+            print ("The outcome is: ", outcome)
+        else: using = False
 
 
-    print (root_node.find_outcome(["low","low","5more","more","big","high"]))
+# Functions used to test data about the tree, not used within actual use of the tree
+def calc_distribution(dataset):
+    distribution = {"unacc": 0, "acc": 0, "good": 0, "vgood": 0}
+    total = len(dataset)
 
+    for datapoint in dataset:
+        distribution[datapoint[-1]] += 1
+
+    for output in distribution:
+        distribution[output] = round(distribution[output] / total, 3)
+
+    return distribution
+
+def generate_data_point():
+    buying = ["vhigh", "high", "med", "low"]
+    maintenance = ["vhigh", "high", "med", "low"]
+    doors = ["2", "3", "4", "5more"]
+    passengers = ["2", "4", "more"]
+    boot_size = ["small", "med", "big"]
+    safety = ["low","med","high"]
+
+    return [
+        random.choice(buying),
+        random.choice(maintenance),
+        random.choice(doors),random.choice(passengers),
+        random.choice(boot_size),random.choice(safety)]
+
+def test_tree():
+    total_time = 0
+    for i in range(0,50):
+        data_point = generate_data_point()
+        outcome = root_node.find_outcome(data_point)
+
+        formatted_data_point = ""
+        for attribute in data_point:
+            formatted_data_point += attribute + ","
+        formatted_data_point += outcome + "\n"
+
+        exists = False
+        with open("car.data","r") as test_file:
+            for line in test_file:
+                if formatted_data_point == line:
+                    exists = True
+
+        if exists is False: return "ERROR"
+    print ("Average time to retrieve an outcome: ", total_time/50, "nanoseconds.")
+    return "No errors found"
